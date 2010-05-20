@@ -5,49 +5,45 @@ Exchange 2003 ICS v1.0
 LMB^Box (Thomas Montague)
 Copyright (c) 2009 - 2010, LMB^Box
 GNU Lesser General Public License (http://www.gnu.org/copyleft/lgpl.html)
-http://labs.lmbbox.com/projects/exchange-2003-calendar-exporter/
+http://labs.lmbbox.com/projects/show/ex2003ics
 
 Based off Peter Krantz's script http://www.peterkrantz.com/2006/exchange-to-ical-http/
 and http://movingparts.net/2007/04/17/syncing-exchange-calendar-1-way-into-korganizerkontact/ script additions
-
-Upgraded script to use Rexchange 0.3.4 <http://rubyforge.org/projects/rexchange/>
 
 =end
 
 # --- CONFIG BEGIN --- #
 # Manual config section
-# Change uri and options to match your settings
-#icsfile = "Exchange.ics"
-#uri = 'https://ExchangeServer/Exchange/Username/'
+# Change URL and options to match your settings
+#url = 'https://ExchangeServer/Exchange/Username/'
 #user = 'Domain\\Username'
 #password = 'Password'
 #subj = "Unknown Subject"
 #attendee = true
+#icsfile = "Exchange.ics"
 # --- CONFIG END --- #
 
 # Defaults
 icsfile = "Exchange.ics"
-uri = ""
+url = ""
 user = ""
 password = ""
 subj = "Unknown Subject"
 attendee = true
 
 def usage(s)
-	puts("Exchange 2003 ICS v1.0")
-    puts(s)
-    puts("Usage: #{File.basename($0)}: [-o 'Exchange.ics'] [-r 'https://ExchangeServer/Exchange/Username/'] [-u 'Domain\\Username'] [-p 'Password'] [-s 'Unknown Subject'] [--exclude-attendee]")
+	puts "Exchange 2003 ICS v1.0"
+    puts s
+    puts "Usage: #{File.basename($0)} -r 'https://ExchangeServer/Exchange/Username/' -u 'Domain\\Username' -p 'Password'"
+	puts "\t\t\t[-s 'Unknown Subject'] [--exclude-attendee] [-o 'Exchange.ics']"
     exit(2)
 end
 
 while !ARGV.empty? do
 	case ARGV[0]
-		when '-o':
-			ARGV.shift
-			icsfile = ARGV.shift
 		when '-r':
 			ARGV.shift
-			uri = ARGV.shift
+			url = ARGV.shift
 		when '-u':
 			ARGV.shift
 			user = ARGV.shift
@@ -60,32 +56,28 @@ while !ARGV.empty? do
 		when '--exclude-attendee':
 			ARGV.shift
 			attendee = false
+		when '-o':
+			ARGV.shift
+			icsfile = ARGV.shift
 		when /^-/:
 			usage("Unknown option: #{ARGV[0].inspect}")
 		else break
 	end
 end
 
-if icsfile.empty? || uri.empty? || user.empty? || password.empty? || subj.empty?
+if icsfile.empty? || url.empty? || user.empty? || password.empty? || subj.empty?
 	usage("Missing Required options!")
 end
 
-
 # --- START --- #
 
-puts "Processing Uri: #{uri}"
+puts "Processing URL: #{url}"
 
 require 'rexchange'
 
-# Transform XML-date to simple UTC format.
-def xformdate(s)
-	s.strftime('%Y%m%dT%H%M%S')
-#	s[23..27] + s[5..6] + s[8..12] + s[14..15] + s[17..18] + "Z"
-end
-
-# We pass our uri (pointing directly to a mailbox), and options hash to RExchange::open
+# We pass our URL (pointing directly to a mailbox), and options hash to RExchange::open
 # to create a RExchange::Session.
-RExchange::open(uri, user, password) do |mailbox|
+RExchange::open(url, user, password) do |mailbox|
 	
 	#create ics file
 	calfile = File.new(icsfile, "w")
@@ -98,14 +90,8 @@ RExchange::open(uri, user, password) do |mailbox|
 	itemcount = 0
 	
 	mailbox.calendar.each do |calitem|
-		
+	
 		calfile.puts "BEGIN:VEVENT"
-		
-		# Set some properties for this event
-#		calfile.puts "DTSTAMP:" + xformdate(calitem.created_at) if calitem.created_at
-#		calfile.puts "DTSTART:" + xformdate(calitem.start_at) if calitem.start_at
-#		calfile.puts "DTEND:" + xformdate(calitem.end_at) if calitem.end_at
-#		calfile.puts "LAST-MODIFIED:" + xformdate(calitem.modified_on) if calitem.modified_on
 		
 		#Set Dates with Time Zone parameter & support all_day_event
 		calfile.puts "DTSTAMP;TZID=" + calitem.created_at.strftime('%Z') + ":" + calitem.created_at.strftime('%Y%m%dT%H%M%S') if calitem.created_at
@@ -119,7 +105,6 @@ RExchange::open(uri, user, password) do |mailbox|
 			calfile.puts "DTEND;TZID=" + calitem.end_at.strftime('%Z') + ":" + calitem.end_at.strftime('%Y%m%dT%H%M%S') if calitem.end_at
 		end
 		
-#		subj = "Unknown Subject"
 		subj = calitem.subject if calitem.subject
 		calfile.puts "SUMMARY:" + subj
 		
