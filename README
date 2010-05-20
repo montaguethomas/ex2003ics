@@ -1,0 +1,11 @@
+= Exchange 2003 ICS
+
+Based off Peter Krantz's script (http://www.peterkrantz.com/2006/exchange-to-ical-http/), this is a ruby script that creates an ICS Calendar file from an Exchange 2003 Calendar. Also used code from Jason 'vanRijn' Kasper's (http://movingparts.net/2007/04/17/syncing-exchange-calendar-1-way-into-korganizerkontact/) modifications to Peter's base script.
+
+== Things you should know
+
+* Requires Ruby 1.8.4 (or later, for the extended WebDAV support in the net/http library)
+
+== Example
+
+ruby ex2003ics.rb -r 'https://ExchangeServer/Exchange/Username/' -u 'Domain\Username' -p 'Password'

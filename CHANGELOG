@@ -1,0 +1,6 @@
+-- 1.0
+* Initial Release based off rexport.rb from http://www.peterkrantz.com/2006/exchange-to-ical-http/
+* Updated to use current version of RExchange (0.3.4)
+* Added support for CLI arguments
+* Added support for All Day Events
+* Added support for Organizer and Attendees based off rexport.rb from http://movingparts.net/2007/04/17/syncing-exchange-calendar-1-way-into-korganizerkontact/
